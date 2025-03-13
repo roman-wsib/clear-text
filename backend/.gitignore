@@ -1,12 +1,10 @@
 .env
 readability-checker/venv
-backend/env
 venv/
 env/
 env/*
-backend/__pycache__
-backend/*.docx
+*__pycache__
+test_runs
+temp_uploads
 __pycache__/
-.DS_Store
-**/*.docx
-**/*.pdf
+*.DS_Store
