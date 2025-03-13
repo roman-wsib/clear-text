@@ -31,6 +31,9 @@ def extract_document_structure(doc, highlighted_words=None, keywords_to_keep=Non
     
     document_elements = []
     
+    # Track media elements in the document
+    media_elements = []
+    
     # Process all paragraphs as structured elements
     for i, paragraph in enumerate(doc.paragraphs):
         if not paragraph.text.strip():
@@ -98,7 +101,53 @@ def extract_document_structure(doc, highlighted_words=None, keywords_to_keep=Non
         
         document_elements.append(element)
     
-    logger.info(f"📋 Extracted {len(document_elements)} document elements")
+    # Extract inline shapes and media elements
+    for i, paragraph in enumerate(doc.paragraphs):
+        # Check for inline shapes in the paragraph
+        for shape in paragraph._element.xpath('.//w:drawing'):
+            media_element = {
+                "id": str(uuid.uuid4()),
+                "type": "media",
+                "index": i,  # Associate with paragraph index
+                "media_type": "inline_shape",
+                "xml_element": shape
+            }
+            media_elements.append(media_element)
+    
+    # Extract all document parts that might contain media
+    for rel_id, rel in doc.part.rels.items():
+        # Check for images, charts, and other media
+        if any(media_type in rel.target_ref for media_type in 
+              ['image', 'media', 'chart', 'diagram', 'drawing']):
+            media_element = {
+                "id": str(uuid.uuid4()),
+                "type": "media",
+                "media_type": "embedded_media",
+                "rel_id": rel_id,
+                "target": rel.target_ref
+            }
+            media_elements.append(media_element)
+    
+    # Check for any shapes in the document
+    if hasattr(doc, 'inline_shapes') and doc.inline_shapes:
+        for i, shape in enumerate(doc.inline_shapes):
+            # Find the paragraph containing this shape
+            for p_idx, paragraph in enumerate(doc.paragraphs):
+                if any(run._element.xpath('.//w:drawing') for run in paragraph.runs):
+                    media_element = {
+                        "id": str(uuid.uuid4()),
+                        "type": "media",
+                        "index": p_idx,  # Associate with paragraph index
+                        "media_type": "inline_shape",
+                        "shape_index": i
+                    }
+                    media_elements.append(media_element)
+                    break
+    
+    # Add media elements to the document elements list
+    document_elements.extend(media_elements)
+    
+    logger.info(f"📋 Extracted {len(document_elements)} document elements (including {len(media_elements)} media elements)")
     return document_elements
 
 def _extract_paragraph_format(paragraph):

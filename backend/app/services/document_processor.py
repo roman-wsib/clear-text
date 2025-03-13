@@ -181,12 +181,19 @@ class DocumentProcessor:
             total_elements = len(type_elements)
             logger.info(f"📄 Processing {total_elements} elements of type: {element_type}")
             
-            # Skip batch processing for headings and TOC entries (process as before)
-            if element_type.startswith("heading_") or element_type in ["toc_entry", "caption"]:
-                processed_texts = [element["text"] for element in type_elements]
-                for element, processed_text in zip(type_elements, processed_texts):
-                    processed_elements[element["id"]] = processed_text
-                logger.info(f"✅ Processed all {total_elements} elements of type: {element_type} (no batching needed)")
+            # Skip processing for media elements, headings and TOC entries
+            if element_type == "media" or element_type.startswith("heading_") or element_type in ["toc_entry", "caption"]:
+                # For media elements, just store the element ID with no text
+                if element_type == "media":
+                    for element in type_elements:
+                        processed_elements[element["id"]] = None
+                    logger.info(f"✅ Preserved {total_elements} media elements (no processing needed)")
+                else:
+                    # For headings and TOC entries, preserve original text
+                    processed_texts = [element["text"] for element in type_elements]
+                    for element, processed_text in zip(type_elements, processed_texts):
+                        processed_elements[element["id"]] = processed_text
+                    logger.info(f"✅ Processed all {total_elements} elements of type: {element_type} (no batching needed)")
                 continue
             
             # For other element types, use batch processing

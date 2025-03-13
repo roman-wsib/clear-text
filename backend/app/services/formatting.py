@@ -1,6 +1,7 @@
 import logging
 import re
 from docx.enum.text import WD_COLOR_INDEX
+import copy
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +20,41 @@ def rebuild_document(doc, elements, processed_elements):
     """
     logger.info("🔄 Rebuilding document with simplified text...")
     
-    for paragraph in doc.paragraphs:
-        paragraph.clear()
+    # Separate media elements from text elements
+    text_elements = [e for e in elements if e["type"] != "media"]
+    media_elements = [e for e in elements if e["type"] == "media"]
+    
+    logger.info(f"Found {len(text_elements)} text elements and {len(media_elements)} media elements")
+    
+    # Create a set of paragraph indexes that contain media elements
+    media_paragraph_indexes = set()
+    for media_element in media_elements:
+        if "index" in media_element:
+            media_paragraph_indexes.add(media_element["index"])
+    
+    logger.info(f"Found {len(media_paragraph_indexes)} paragraphs containing media elements")
     
     # Create a mapping of element indexes to original paragraphs
     paragraph_map = {}
     for i, para in enumerate(doc.paragraphs):
         paragraph_map[i] = para
     
+    # Only clear paragraphs that don't contain media elements
+    for i, paragraph in enumerate(doc.paragraphs):
+        if i not in media_paragraph_indexes:
+            paragraph.clear()
+    
     # Rebuild each paragraph with its processed text
     simplified_full_text = ""
     
-    for element in elements:
+    for element in text_elements:
         element_id = element["id"]
         original_index = element["index"]
+        
+        # Skip paragraphs that contain media elements
+        if original_index in media_paragraph_indexes:
+            simplified_full_text += element["text"] + "\n"
+            continue
         
         # Get the processed text for this element
         processed_text = processed_elements.get(element_id, element["text"])
@@ -51,7 +73,8 @@ def rebuild_document(doc, elements, processed_elements):
         
         # Apply text and restore formatting
         restore_paragraph_formatting(paragraph, element, processed_text)
-        
+    
+    logger.info(f"✅ Document rebuilt with {len(text_elements)} text elements and {len(media_elements)} preserved media elements")
     return simplified_full_text
 
 def restore_paragraph_formatting(paragraph, element, processed_text):
