@@ -1,0 +1,13 @@
+export const BLUE_COLOUR = '#2D9CDB';
+export const BLUE_JAY_COLOUR = 'var(--0076-bf-bluejay, #0076bf)';
+export const CARBON_COLOUR = 'var(--333333-carbon, #333)';
+export const CONCRETE_COLOUR = 'var(--bbbab-9-concrete, #BBBAB9)';
+export const BLACK_COLOUR = '#000000';
+export const YELLOW_COLOUR = '#FCF8E3';
+export const RED_COLOUR = '#D90000';
+export const TRILLIUM_COLOUR = 'var(--ffffff-trillium, #FFF)';
+export const GRANITE_COLOUR = 'var(--5-e-6-a-71-granite, #5e6a71)';
+export const GRAY_COLOUR = '#f9f9f9';
+export const GRAY_3_COLOUR = 'var(--Gray-3, #828282)';
+export const SNOW_COLOUR = '#F6F8FA';
+export const MIDNIGHT_COLOUR = 'var(--003359-midnight, #003359)';

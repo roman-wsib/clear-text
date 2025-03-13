@@ -1,0 +1,21 @@
+GET http://localhost:5000
+###
+GET http://localhost:5000/dummy
+###
+GET http://localhost:5000/api/home
+
+GET /health             -> GET /health
+GET /prepopulate-data   -> GET /default-config
+POST /dummy-upload      -> POST /docs/dummy
+POST /simplify-file     -> POST /docs/simplification
+POST /simplify-text     -> POST /text/simplification
+GET /get-file           -> GET /docs/simplification
+
+
+
+GET /health
+GET /default-config
+POST /text
+POST /doc/dummy
+POST /doc
+GET /doc
